@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'lujian\\' => array($baseDir . '/'),
+    'lujian\\wechat\\' => array($baseDir . '/'),
 );

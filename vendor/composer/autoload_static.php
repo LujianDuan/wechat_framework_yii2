@@ -9,12 +9,12 @@ class ComposerStaticInitae8ac9c47f9ec41109a9c9f316f77a56
     public static $prefixLengthsPsr4 = array (
         'l' => 
         array (
-            'lujian\\' => 7,
+            'lujian\\wechat\\' => 14,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'lujian\\' => 
+        'lujian\\wechat\\' => 
         array (
             0 => __DIR__ . '/../..' . '/',
         ),
