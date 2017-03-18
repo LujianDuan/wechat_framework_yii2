@@ -1,0 +1,19 @@
+{
+  "name": "lujianduan/wechat_framework_yii2",
+  "description": "A frameworw based yii2.0 for wechat develop.",
+  "type": "library",
+  "authors": [
+    {
+      "name": "duanlujian",
+      "email": "379167658@qq.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "lujian\\wechat": ""
+    }
+  }
+}
