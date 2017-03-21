@@ -11,11 +11,16 @@ use lujian\wechat\events\subscribeEvent;
 use lujian\wechat\events\TextMessageEvent;
 use yii\base\Component;
 use Yii;
+//use lujian\wechat\lib\Prpcrypt; //自己手动实现需要
+use lujian\wechat\lib\wxBizMsgCrypt;
 
 class  Service extends Component
 {
     public $XML;
-//    public $EncodingAESKey;
+    public $WXBizMsgCrypt;
+    public $token;
+    public $EncodingAESKey;
+    public $appID;
     const EVENT_TEXT_MESSAGE = 'onEventTextMessage';
     const EVENT_SCAN_SUBSCRIBE_EVENT = 'onEventScanSubscribe';
     const EVENT_SCAN_EVENT = 'onEventScan';//已关注用户扫描二维码,经测试，微信方并没有推送消息，该动作不会触发事件
@@ -24,21 +29,44 @@ class  Service extends Component
     const EVENT_LOCATION_EVENT = 'onEventLocation';
     const EVENT_CLICK_EVENT = 'onEventClick';
     const EVENT_View_EVENT = 'onEventView';
+    private $signature;
+    private $nonce;
+    private $timestamp;
+    private $msg_signature;
 
-    /**
-     * @return mixed
-     * 接收微信服务器推送过来的消息
-     */
+
     public function init()
     {
         if (!$this->XML instanceof XML) {
             $this->XML = Yii::createObject($this->XML);
         }
+        if (!empty($this->EncodingAESKey)) {
+            $this->WXBizMsgCrypt = new wxBizMsgCrypt($this->token, $this->EncodingAESKey, $this->appID);
+        }
     }
 
-    public function receive()
+    /**
+     * @return mixed
+     * 接收微信服务器推送过来的消息
+     */
+    public function receive($params)
     {
+        $this->signature = $params['signature'];
+        $this->timestamp = $params['timestamp'];
+        $this->nonce = $params['nonce'];
+        $this->msg_signature = $params['msg_signature'];
         $xml = file_get_contents("php://input");
+        if (!empty($this->msg_signature)) {
+            $msg = '';
+            $this->WXBizMsgCrypt->decryptMsg($this->msg_signature, $this->timestamp, $this->nonce, $xml, $msg);
+            $xml = $msg;
+            //自己实现
+//            $_arr = $this->XML->xmlToArray($xml);
+//            $encode_text = $_arr['Encrypt'];
+//            $pc = new Prpcrypt($this->EncodingAESKey);
+//            $result = $pc->decrypt($encode_text, $this->appID);
+//            $xml = $result[1];
+        }
         $arr = $this->XML->xmlToArray($xml);
         return $arr;
     }
@@ -98,11 +126,15 @@ class  Service extends Component
 
     public function send($params)
     {
-//        db('log2',$params);
         if (!is_array($params)) {
             throw new Exception('发送消息只支持数组格式的数据,系统会自动将数组转换为xml');
         }
         $xml = $this->XML->arrayToXml($params);
+        if (!empty($this->msg_signature)) {
+            $replyMsg = '';
+            $this->WXBizMsgCrypt->encryptMsg($xml, $this->timestamp, $this->nonce, $replyMsg);
+            $xml = $replyMsg;
+        }
         echo $xml;
     }
 

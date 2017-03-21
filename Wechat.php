@@ -16,14 +16,21 @@ class Wechat extends Component
     public $service;
     public $wxApi;
     public $TOKEN;
+    public $appID;
+    public $appsecret;
+    public $EncodingAESKey;
 
     public function init()
     {
         if (!$this->service instanceof service) {
-            $this->service = Yii::createObject($this->service);
+            $extends = ['EncodingAESKey' => $this->EncodingAESKey, 'token' => $this->TOKEN,'appID'=>$this->appID];
+            $params = array_merge($this->service, $extends);
+            $this->service = Yii::createObject($params);
         }
         if (!$this->wxApi instanceof wxApi) {
-            $this->wxApi = Yii::createObject($this->wxApi);
+            $extends = ['appID' => $this->appID, 'appsecret' => $this->appsecret];
+            $params = array_merge($this->wxApi, $extends);
+            $this->wxApi = Yii::createObject($params);
         }
     }
 
@@ -47,9 +54,9 @@ class Wechat extends Component
     /**
      * 提供服务
      */
-    public function service()
+    public function service($params)
     {
-        $arr = $this->service->receive();
+        $arr = $this->service->receive($params);
         $this->service->listen($arr);
     }
 

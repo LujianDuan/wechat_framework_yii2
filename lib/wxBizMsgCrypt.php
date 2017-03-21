@@ -6,6 +6,8 @@ namespace lujian\wechat\lib;
  * 2.第三方收到公众平台发送的消息，验证消息的安全性，并对消息进行解密。
  */
 use yii\base\Component;
+//use lujian\wechat\lib\Prpcrypt;
+//use lujian\wechat\lib\SHA1;
 
 class wxBizMsgCrypt extends Component
 {

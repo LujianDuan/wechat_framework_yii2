@@ -15,4 +15,5 @@ class subscribeEvent extends Event {
     public $MsgType;
     public $Event;
     public $EventKey;
+    public $Encrypt;
 }

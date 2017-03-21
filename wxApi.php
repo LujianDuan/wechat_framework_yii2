@@ -191,4 +191,35 @@ class wxApi extends Component
         $ret = json_decode($json, true);
         return $ret;
     }
+
+    public function generateMsg($template)
+    {
+        $data = iunserializer($template['data']);
+        if (!is_array($data)) {
+            die(json_encode(array(
+                'result' => 0,
+                'mesage' => '模板有错误!',
+            )));
+        }
+        $msg = array(
+            'first' => array(
+                'value' => $template['first'],
+                'color' => $template['firstcolor']
+            ),
+            'remark' => array(
+                'value' => $template['remark'],
+                'color' => $template['remarkcolor']
+            )
+        );
+        for ($i = 0; $i < count($data); $i++) {
+            $msg[$data[$i]['keywords']] = array(
+                'value' => $data[$i]['value'],
+                'color' => $data[$i]['color']
+            );
+        }
+
+        return $msg;
+    }
+
+
 }

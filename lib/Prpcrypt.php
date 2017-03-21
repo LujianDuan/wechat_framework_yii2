@@ -22,6 +22,7 @@ class Prpcrypt extends Component
     function __construct($k)
     {
         $this->key = base64_decode($k . "=");
+//        $this->key = $k;
     }
 
     /**
@@ -65,7 +66,6 @@ class Prpcrypt extends Component
      */
     public function decrypt($encrypted, $appid)
     {
-
         try {
             //使用BASE64对需要解密的字符串进行解码
             $ciphertext_dec = base64_decode($encrypted);
@@ -98,6 +98,7 @@ class Prpcrypt extends Component
             //print $e;
             return array(-40008, null);
         }
+
         if ($from_appid != $appid)
             return array(-40005, null);
         return array(0, $xml_content);

@@ -15,4 +15,5 @@ class TextMessageEvent extends Event {
     public $MsgType;
     public $Content;
     public $MsgId;
+    public $Encrypt;
 }
