@@ -7,6 +7,7 @@ namespace lujian\wechat;
  * Date: 2017/3/17
  * Time: 17:54
  */
+use lujian\wechat\events\menuClickEvent;
 use lujian\wechat\events\subscribeEvent;
 use lujian\wechat\events\TextMessageEvent;
 use yii\base\Component;
@@ -100,12 +101,12 @@ class  Service extends Component
 
                     break;
                 case 'CLICK':
-                    //自定义菜单
-                    $this->trigger(self::EVENT_CLICK_EVENT, new subscribeEvent($input));
+                    //自定义菜单事件推送
+                    $this->trigger(self::EVENT_CLICK_EVENT, new menuClickEvent($input));
                     break;
                 case 'VIEW':
                     //菜单跳转链接
-                    $this->trigger(self::EVENT_View_EVENT, new subscribeEvent($input));
+                    $this->trigger(self::EVENT_View_EVENT, new menuClickEvent($input));
 
                     break;
                 case 'SCAN':
@@ -170,6 +171,19 @@ class  Service extends Component
             'MsgType' => 'news',
             'ArticleCount' => $article_count,
             'Articles' => $articles
+        ];
+        $this->send($params);
+    }
+
+    public function TransferCustomer($event)
+    {
+        $from = $event->ToUserName;
+        $to = $event->FromUserName;
+        $params = [
+            'ToUserName' => $to,
+            'FromUserName' => $from,
+            'CreateTime' => time(),
+            'MsgType' => 'transfer_customer_service'
         ];
         $this->send($params);
     }

@@ -21,17 +21,34 @@ class wxApi extends Component
     public $cache;
 
 
-    private $url_list = [
+    protected $url_list = [
         'base_url' => 'https://api.weixin.qq.com/cgi-bin',
+
         'upload_media' => '/media/upload?access_token=ACCESS_TOKEN&type=TYPE',
         'access_token' => '/token?grant_type=client_credential&appid=APPID&secret=APPSECRET',
         'ip_list' => '/getcallbackip?access_token=ACCESS_TOKEN',
+        /**
+         * 账号管理，二维码相关
+         */
+        'qr_ticket' => '/qrcode/create?access_token=ACCESS_TOKEN',
+        'qr_img' => 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=TICKET',
+        'long2short' => '/shorturl?access_token=ACCESS_TOKEN',
         /**
          * 客服相关
          */
         'kf_list' => '/customservice/getkflist?access_token=ACCESS_TOKEN',
         'kf_add' => '/customservice/kfaccount/add?access_token=ACCESS_TOKEN',
         'kf_msg' => '/message/custom/send?access_token=ACCESS_TOKEN',
+        /**
+         * 模板消息
+         */
+        'template_message' => '/message/template/send?access_token=ACCESS_TOKEN',
+        'template_mp' => '/template/api_set_industry?access_token=ACCESS_TOKEN',
+        /**
+         * 用户相关
+         */
+        'user_list' => '/user/get?access_token=ACCESS_TOKEN',
+        'user_info' => '/user/info?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN',
         /**
          * 菜单相关
          */
@@ -52,7 +69,7 @@ class wxApi extends Component
 
     }
 
-    private function getRealUrl($key)
+    protected function getRealUrl($key)
     {
         if ($key == 'base_url') {
             return $this->url_list[$key];
@@ -60,7 +77,8 @@ class wxApi extends Component
         $url = $this->url_list[$key];
         $url = str_replace(['APPID', 'APPSECRET'], [$this->appID, $this->appsecret], $url);
         if (strpos($url, 'ACCESS_TOKEN') !== false) {
-            $url = str_replace('ACCESS_TOKEN', $this->getAccess_token(), $url);
+            $access_token = $this->getAccess_token();
+            $url = str_replace('ACCESS_TOKEN', $access_token, $url);
         }
         $real_url = $this->url_list['base_url'] . $url;
         return $real_url;
@@ -87,7 +105,7 @@ class wxApi extends Component
         }
         $token_key = $this->appID;
         $access_token = $token_arr['access_token'];
-        $expire = $token_arr['expires_in'];
+        $expire = 7000;
         $this->cache->set($token_key, $access_token, $expire);
         return $access_token;
     }
@@ -103,93 +121,6 @@ class wxApi extends Component
             return false;
         }
         return $ip_list['ip_list'];
-    }
-
-    public function send_message($to, $content)
-    {
-        $url = $this->getRealUrl('kf_msg');
-        $params = [
-            'touser' => $to,
-            'msgtype' => 'text',
-            'text' => [
-                'content' => $content
-            ]
-        ];
-        $json = $this->CURL->http_post($url, $this->json_encode($params));
-        $list = json_decode($json, true);
-        return $list;
-    }
-
-    public function kf_add($kf_account, $nickname, $pwd)
-    {
-        $url = $this->getRealUrl('kf_list');
-        $params = [
-            'kf_account' => $kf_account,
-            'nickname' => $nickname,
-            'password' => md5($pwd)
-        ];
-        $json = $this->CURL->http_post($url, json_encode($params));
-        $list = json_decode($json, true);
-        if (!$list || isset($list['errcode'])) {
-            $this->errCode = $list['errcode'];
-            $this->errMsg = $list['errmsg'];
-            return false;
-        }
-        return $list;
-    }
-
-    public function getKf_list()
-    {
-        $url = $this->getRealUrl('kf_list');
-        $kf_json = $this->CURL->http_get($url);
-        $kf_list = json_decode($kf_json, true);
-        if (!$kf_list || isset($kf_list['errcode'])) {
-            $this->errCode = $kf_list['errcode'];
-            $this->errMsg = $kf_list['errmsg'];
-            return false;
-        }
-        return $kf_list['kf_list'];
-    }
-
-    public function CreateMenu($menu_arr)
-    {
-        $url = $this->getRealUrl('create_menu');
-        $params = json_encode($menu_arr, JSON_UNESCAPED_UNICODE);
-        $json = $this->CURL->http_post($url, $params);
-        $ret = json_decode($json, true);
-        return $ret;
-    }
-
-    /**
-     * @return array|mixed|\stdClass
-     * 查询接口创建的菜单
-     */
-    public function GetMenu()
-    {
-        $url = $this->getRealUrl('get_menu');
-        $json = $this->CURL->http_get($url);
-        $ret = json_decode($json, true);
-        return $ret;
-    }
-
-    /**
-     * @return array|mixed|\stdClass
-     * 查询所有菜单，包括非接口创建的菜单
-     */
-    public function QueryMenu()
-    {
-        $url = $this->getRealUrl('query_menu');
-        $json = $this->CURL->http_get($url);
-        $ret = json_decode($json, true);
-        return $ret;
-    }
-
-    public function DelMenu()
-    {
-        $url = $this->getRealUrl('del_menu');
-        $json = $this->CURL->http_get($url);
-        $ret = json_decode($json, true);
-        return $ret;
     }
 
     public function generateMsg($template)
@@ -220,6 +151,4 @@ class wxApi extends Component
 
         return $msg;
     }
-
-
 }
