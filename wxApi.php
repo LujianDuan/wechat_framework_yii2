@@ -4,6 +4,7 @@ namespace lujian\wechat;
 use lujian\wechat\lib\CURL;
 use Yii;
 use yii\base\Component;
+use yii\base\Exception;
 
 /**
  * Created by PhpStorm.
@@ -56,6 +57,10 @@ class wxApi extends Component
         'get_menu' => '/menu/get?access_token=ACCESS_TOKEN',//获取菜单
         'query_menu' => '/menu/get?access_token=ACCESS_TOKEN',//获取菜单，包括非接口创建的菜单
         'del_menu' => '/menu/delete?access_token=ACCESS_TOKEN',//删除菜单
+        /**
+         * JSSDK相关
+         */
+        'js_ticket' => '/ticket/getticket?type=jsapi&access_token=ACCESS_TOKEN',
     ];
 
     public function init()
@@ -86,7 +91,7 @@ class wxApi extends Component
 
     public function getAccess_token()
     {
-        $token_key = $this->appID;
+        $token_key = 'base_token_' . $this->appID;
         if (!$token = $this->cache->get($token_key)) {
             $token = $this->refreshAccess_token();
         }
@@ -99,11 +104,12 @@ class wxApi extends Component
         $token_json = $this->CURL->http_get($url);
         $token_arr = json_decode($token_json, true);
         if (!$token_arr || isset($token_arr['errcode'])) {
-            $this->errCode = $token_arr['errcode'];
-            $this->errMsg = $token_arr['errmsg'];
+            throw new Exception($token_arr['errcode']);
+//            $this->errCode = $token_arr['errcode'];
+//            $this->errMsg = $token_arr['errmsg'];
             return false;
         }
-        $token_key = $this->appID;
+        $token_key = 'base_token_' . $this->appID;
         $access_token = $token_arr['access_token'];
         $expire = 7000;
         $this->cache->set($token_key, $access_token, $expire);

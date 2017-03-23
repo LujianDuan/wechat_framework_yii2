@@ -27,6 +27,7 @@ class Wechat extends Component
     private $_wxQRCode;
     private $_wxTemplate;
     private $_wxUser;
+    private $_wxJSSDK;
 
     public function init()
     {
@@ -61,6 +62,11 @@ class Wechat extends Component
     public function getWxUser()
     {
         return $this->registerCompontent('wxUser');
+    }
+
+    public function getWxJSSDK()
+    {
+        return $this->registerCompontent('wxJSSDK');
     }
 
 //可读属性返回组件结束
